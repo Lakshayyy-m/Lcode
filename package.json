@@ -1,0 +1,30 @@
+{
+  "name": "lcode",
+  "version": "1.0.0",
+  "description": "Lakshay's coding harness",
+  "homepage": "https://github.com/Lakshayyy-m/Lcode#readme",
+  "bugs": {
+    "url": "https://github.com/Lakshayyy-m/Lcode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lakshayyy-m/Lcode.git"
+  },
+  "license": "ISC",
+  "author": "Lakshay Manchanda",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx tsx src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@ai-sdk/xai": "^5.0.23",
+    "ai": "^7.0.142",
+    "zod": "^4.6.7"
+  }
+}
