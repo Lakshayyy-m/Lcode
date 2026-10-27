@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import z from "zod";
-import { execSync } from "node:child_process";
+import { SAFE_PREFIXES } from "../../lib/constants.js";
 
 const bashToolSchema = z.object({
   command: z
@@ -16,15 +16,15 @@ export interface BashOperations {
 
 export default function createBashTool(
   operations: BashOperations,
-  safePrefixes: string[],
+  needsApproval: (input: { command: string }) => boolean,
 ) {
   return tool({
     inputSchema: bashToolSchema,
     execute: async ({ command }) => {
       console.log("Using Bash Tool------------------------");
-      if (!isSafe(command, safePrefixes)) {
+      if (needsApproval({ command })) {
         console.log("Command rejected: ", command);
-        return `Blocked: "${command}" requires approval. Only safe commands like ${safePrefixes.join(", ")} run automatically`;
+        return `Blocked: "${command}" requires approval.`;
       }
       console.log("Command executed: ", command);
 
@@ -59,4 +59,21 @@ function isSafe(command: string, safePrefixes: string[]) {
     if (command.trim().startsWith(safe)) return true;
   }
   return false;
+}
+
+export type ApprovalConfig =
+  | { mode: "interactive" }
+  | { mode: "background" }
+  | { mode: "delegated"; trust: string[] };
+
+export function createApproval(config: ApprovalConfig) {
+  return ({ command }: { command: string }) => {
+    if (config.mode === "background") return false;
+
+    if (config.mode === "delegated") {
+      return !isSafe(command, config.trust);
+    }
+
+    return !isSafe(command, SAFE_PREFIXES);
+  };
 }

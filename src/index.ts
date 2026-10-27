@@ -2,7 +2,9 @@ import { stepCountIs, ToolLoopAgent } from "ai";
 import { xai } from "@ai-sdk/xai";
 import createReadTool from "./tools/FileSystemTools/ReadFileTool.js";
 import createGrepTool from "./tools/FileSystemTools/GrepFileTool.js";
-import createBashTool from "./tools/GeneralTools/BashTool.js";
+import createBashTool, {
+  createApproval,
+} from "./tools/GeneralTools/BashTool.js";
 import { SAFE_PREFIXES } from "./lib/constants.js";
 import localOps from "./lib/LocalOpsBackend.js";
 
@@ -19,7 +21,7 @@ export const agent = new ToolLoopAgent({
   tools: {
     read: createReadTool(),
     grep: createGrepTool(),
-    bash: createBashTool(localOps, SAFE_PREFIXES),
+    bash: createBashTool(localOps, createApproval({ mode: "interactive" })),
   },
   instructions: INSTRUCTIONS,
   stopWhen: stepCountIs(10),
