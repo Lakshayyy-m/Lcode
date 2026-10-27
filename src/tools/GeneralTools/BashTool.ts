@@ -30,6 +30,7 @@ export default function createBashTool() {
   return tool({
     inputSchema: bashToolSchema,
     execute: ({ command }) => {
+      console.log("Using Bash Tool------------------------")
       if (!isSafe(command)) {
         console.log("Command rejected: ", command);
         return `Blocked: "${command}" requires approval. Only safe commands like ${SAFE_PREFIXES.join(", ")} run automatically`;
@@ -49,10 +50,23 @@ export default function createBashTool() {
       }
     },
     description: `
-      Execute a shell command in the current working directory
-      WHEN TO USE: running build commands, installing packages, running tests, git operations, directory listings.
-      WHEN NOT TO USE: reading file contents (use read instead).  searching for patterns (use grep instead).
-      DO NOT USE FOR: reading files (use read), searching patterns (use grep).
+    Execute a shell command in the working directory.
+
+    WHEN TO USE: running build commands, installing packages, running tests,
+      git operations, directory listings.
+
+    WHEN NOT TO USE: reading file contents (use read instead).
+      Searching for patterns (use grep instead).
+
+    DO NOT USE FOR: reading files (use read), searching code or patterns (use grep).
+
+    USAGE: command is a single shell string. Commands not in the safe-prefix
+      allowlist are blocked and return a clear error message.
+
+    EXAMPLES:
+      - List files: command "ls -la"
+      - Check git status: command "git status"
+      - Run a test suite: command "npm test"
     `,
     name: "Bash Tool",
   });

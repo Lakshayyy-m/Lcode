@@ -14,6 +14,7 @@ const readToolSchema = z.object({
 export default function createReadTool() {
   return tool({
     execute: ({ path: filePath, offset, limit }) => {
+      console.log("Using Read Tool--------------------------")
       const abs = resolve(cwd, filePath);
       const content = readFileSync(abs, "utf-8");
       let lines = content.split("\n");
@@ -32,11 +33,19 @@ export default function createReadTool() {
     },
     inputSchema: readToolSchema,
     description: `
-      Read a file from the project. Returns numbered lines.
-      WHEN TO USE: viewing file contents, checking configs, reading source code.
-      WHEN NOT TO USE: searching accross files (use grep instead).
-      DO NOT USE FOR: running commands, listing directories.
-    `,
+    Read a file from the project. Returns numbered lines.
+
+    WHEN TO USE: viewing file contents, checking configurations, reading source code,
+      examining specific lines with offset/limit.
+
+    WHEN NOT TO USE: searching for patterns across files (use grep instead).
+      Running commands (use bash instead).
+
+    DO NOT USE FOR: searching code (use grep), executing commands (use bash),
+      modifying files (use edit or write).
+
+    USAGE: path is relative to working directory. offset and limit are optional.
+      Output is capped at 500 lines.`,
     name: "Read-Tool",
   });
 }
