@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import z from "zod";
 
-const cwd = resolve(process.argv[2] || process.cwd());
+const cwd = resolve(process.argv[1] || process.cwd());
 
 const readToolSchema = z.object({
   path: z.string().describe("File path relative to working directory"),
@@ -35,6 +35,7 @@ export default function createReadTool() {
       Read a file from the project. Returns numbered lines.
       WHEN TO USE: viewing file contents, checking configs, reading source code.
       WHEN NOT TO USE: searching accross files (use grep instead).
+      DO NOT USE FOR: running commands, listing directories.
     `,
     name: "Read-Tool",
   });
