@@ -2,22 +2,6 @@ import { tool } from "ai";
 import z from "zod";
 import { execSync } from "node:child_process";
 
-const cwd = process.argv[1] || process.cwd();
-
-const SAFE_PREFIXES = [
-  "ls",
-  "cat",
-  "pwd",
-  "git status",
-  "git log",
-  "git diff",
-  "which",
-  "find",
-  "head",
-  "tail",
-  "wc",
-];
-
 const bashToolSchema = z.object({
   command: z
     .string()
@@ -26,28 +10,26 @@ const bashToolSchema = z.object({
     ),
 });
 
-export default function createBashTool() {
+export interface BashOperations {
+  exec(command: string): Promise<{ stdout: string; exitCode: number }>;
+}
+
+export default function createBashTool(
+  operations: BashOperations,
+  safePrefixes: string[],
+) {
   return tool({
     inputSchema: bashToolSchema,
-    execute: ({ command }) => {
-      console.log("Using Bash Tool------------------------")
-      if (!isSafe(command)) {
+    execute: async ({ command }) => {
+      console.log("Using Bash Tool------------------------");
+      if (!isSafe(command, safePrefixes)) {
         console.log("Command rejected: ", command);
-        return `Blocked: "${command}" requires approval. Only safe commands like ${SAFE_PREFIXES.join(", ")} run automatically`;
+        return `Blocked: "${command}" requires approval. Only safe commands like ${safePrefixes.join(", ")} run automatically`;
       }
       console.log("Command executed: ", command);
 
-      try {
-        const output = execSync(command, {
-          cwd,
-          encoding: "utf-8",
-          timeout: 30_000,
-        });
-        console.log(output);
-        return output || "(no output)";
-      } catch (error: any) {
-        return `Exit ${error.status ?? 1}: ${error.stdout || error.stderr || e.message || ""}`;
-      }
+      const { stdout } = await operations.exec(command);
+      return stdout || "(no output)";
     },
     description: `
     Execute a shell command in the working directory.
@@ -72,8 +54,8 @@ export default function createBashTool() {
   });
 }
 
-function isSafe(command: string) {
-  for (let safe of SAFE_PREFIXES) {
+function isSafe(command: string, safePrefixes: string[]) {
+  for (let safe of safePrefixes) {
     if (command.trim().startsWith(safe)) return true;
   }
   return false;
