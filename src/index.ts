@@ -2,6 +2,7 @@ import { stepCountIs, ToolLoopAgent } from "ai";
 import { xai } from "@ai-sdk/xai";
 import createReadTool from "./tools/FileSystemTools/ReadFileTool.js";
 import createGrepTool from "./tools/FileSystemTools/GrepFileTool.js";
+import createBashTool from "./tools/GeneralTools/BashTool.js";
 
 process.loadEnvFile();
 
@@ -13,12 +14,17 @@ const INSTRUCTIONS = `
 
 export const agent = new ToolLoopAgent({
   model: MODEL,
-  tools: { read: createReadTool(), grep: createGrepTool() },
+  tools: {
+    read: createReadTool(),
+    grep: createGrepTool(),
+    bash: createBashTool(),
+  },
   instructions: INSTRUCTIONS,
   stopWhen: stepCountIs(10),
-});
+}); 
 
 const prompt = process.argv.slice(2).join(" ") || "Hello.";
+console.log(prompt);
 const { text, steps } = await agent.generate({ prompt });
 console.log(text);
-console.log(steps);
+// console.log(steps);
