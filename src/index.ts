@@ -5,16 +5,12 @@ import createGrepTool from "./tools/FileSystemTools/GrepFileTool.js";
 import createBashTool, {
   createApproval,
 } from "./tools/GeneralTools/BashTool.js";
-import { SAFE_PREFIXES } from "./lib/constants.js";
 import localOps from "./lib/LocalOpsBackend.js";
+import { INSTRUCTIONS } from "./lib/constants.js";
 
 process.loadEnvFile();
 
-const cwd = process.argv[1] || process.cwd();
 const MODEL = xai("grok-4.3");
-const INSTRUCTIONS = `
-  You are a coding agent. \n Working directory: ${cwd}
-  `;
 
 export const agent = new ToolLoopAgent({
   model: MODEL,
