@@ -6,9 +6,10 @@ import createBashTool, {
   createApproval,
 } from "./tools/GeneralTools/BashTool.js";
 import localOps from "./lib/LocalOpsBackend.js";
-import { INSTRUCTIONS } from "./lib/constants.js";
+import { buildSystemPrompt, type PromptContext } from "./system.js";
 
 process.loadEnvFile();
+const cwd = process.argv[1] || process.cwd();
 
 const MODEL = xai("grok-4.3");
 
@@ -19,7 +20,11 @@ export const agent = new ToolLoopAgent({
     grep: createGrepTool(),
     bash: createBashTool(localOps, createApproval({ mode: "interactive" })),
   },
-  instructions: INSTRUCTIONS,
+  instructions: buildSystemPrompt({
+    workingDirectory: cwd,
+    sandboxType: "local",
+    toolNames: ["read", "grep", "bash"],
+  }),
   stopWhen: stepCountIs(10),
 });
 
@@ -28,3 +33,11 @@ console.log(prompt);
 const { text, steps } = await agent.generate({ prompt });
 console.log(text + "\n");
 // console.log(steps);
+
+console.log(
+  buildSystemPrompt({
+    workingDirectory: cwd,
+    sandboxType: "local",
+    toolNames: ["read", "grep", "bash"],
+  }),
+);
