@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import z from "zod";
 
-const cwd = resolve(process.argv[1] || process.cwd());
+const workingDir = resolve(process.argv[1] || process.cwd());
 
 const readToolSchema = z.object({
   path: z.string().describe("File path relative to working directory"),
@@ -15,7 +15,7 @@ export default function createReadTool() {
   return tool({
     execute: ({ path: filePath, offset, limit }) => {
       console.log("Using Read Tool--------------------------")
-      const abs = resolve(cwd, filePath);
+      const abs = resolve(workingDir, filePath);
       const content = readFileSync(abs, "utf-8");
       let lines = content.split("\n");
 

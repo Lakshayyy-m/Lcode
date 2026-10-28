@@ -18,13 +18,13 @@ const grepSchema = z.object({
   glob: z.string().optional().describe(`File glob filter, eg. '*.ts'`),
 });
 
-const cwd = resolve(process.argv[1] || process.cwd());
+const workingDir = resolve(process.argv[1] || process.cwd());
 
 export default function createGrepTool() {
   return tool({
     execute: ({ pattern, path, glob }) => {
       console.log("Using Grep Tool------------------")
-      const pointOfInterest = resolve(cwd, path || ".");
+      const pointOfInterest = resolve(workingDir, path || ".");
       const escapedPattern = pattern.replace(/'/g, `'\\''`);
       const escapedGlob = (glob || "*").replace(/'/g, `'\\''`);
       const cmd = `grep -rn --exclude-dir=node_modules --exclude-dir=.git --include='${escapedGlob}' -E '${escapedPattern}' '${pointOfInterest}' 2>/dev/null`;
