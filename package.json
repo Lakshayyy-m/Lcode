@@ -25,6 +25,7 @@
   "dependencies": {
     "@ai-sdk/xai": "^5.0.23",
     "ai": "^7.0.142",
+    "just-bash": "^3.6.0",
     "zod": "^4.6.7"
   }
 }

@@ -5,15 +5,19 @@ import createGrepTool from "./tools/FileSystemTools/GrepFileTool.js";
 import createBashTool, {
   createApproval,
 } from "./tools/GeneralTools/BashTool.js";
-import localOps from "./lib/LocalOpsBackend.js";
 import { buildSystemPrompt, type PromptContext } from "./system.js";
 import { join, resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { createLocalSandbox } from "./sanbox-local.js";
+import { createJustBashSandbox } from "./sandbox-just-bash.js";
 
 process.loadEnvFile();
 const cwd = resolve(process.cwd());
-const sandbox = createLocalSandbox(cwd);
+const sandboxType = process.env.SANDBOX || "local";
+const sandbox =
+  sandboxType === "just-bash"
+    ? await createJustBashSandbox(cwd)
+    : createLocalSandbox(cwd);
 console.error(`Sanbox: ${sandbox.type}`);
 const MODEL = xai("grok-4.3");
 const TOOLS = {
