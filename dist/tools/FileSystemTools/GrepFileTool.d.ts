@@ -1,4 +1,5 @@
-export default function createGrepTool(): ({
+import type { Sandbox } from "../../sanbox.js";
+export default function createGrepTool(sandbox: Sandbox): ({
     deferLoading?: boolean;
     title?: string;
     providerOptions?: import("@ai-sdk/provider-utils").ProviderOptions;

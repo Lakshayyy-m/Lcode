@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import z from "zod";
+import { type Sandbox } from "../../sanbox.js";
 
 const workingDir = resolve(process.argv[1] || process.cwd());
 
@@ -11,12 +12,12 @@ const readToolSchema = z.object({
   limit: z.number().optional().describe("Max lines to return"),
 });
 
-export default function createReadTool() {
+export default function createReadTool(sandbox: Sandbox) {
   return tool({
-    execute: ({ path: filePath, offset, limit }) => {
-      console.log("Using Read Tool--------------------------")
+    execute: async ({ path: filePath, offset, limit }) => {
+      console.log("Using Read Tool--------------------------");
       const abs = resolve(workingDir, filePath);
-      const content = readFileSync(abs, "utf-8");
+      const content = await sandbox.readFile(abs);
       let lines = content.split("\n");
 
       if (offset) lines = lines.splice(offset - 1);

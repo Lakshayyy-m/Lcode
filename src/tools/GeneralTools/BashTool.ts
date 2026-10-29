@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import z from "zod";
 import { SAFE_PREFIXES } from "../../lib/constants.js";
+import type { Sandbox } from "../../sanbox.js";
 
 const bashToolSchema = z.object({
   command: z
@@ -15,7 +16,7 @@ export interface BashOperations {
 }
 
 export default function createBashTool(
-  operations: BashOperations,
+  sandbox: Sandbox,
   needsApproval: (input: { command: string }) => boolean,
 ) {
   return tool({
@@ -28,7 +29,7 @@ export default function createBashTool(
       }
       console.log("Command executed: ", command);
 
-      const { stdout } = await operations.exec(command);
+      const { stdout } = await sandbox.exec(command);
       return stdout || "(no output)";
     },
     description: `

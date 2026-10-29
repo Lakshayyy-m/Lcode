@@ -1,4 +1,5 @@
-export default function createReadTool(): ({
+import { type Sandbox } from "../../sanbox.js";
+export default function createReadTool(sandbox: Sandbox): ({
     deferLoading?: boolean;
     title?: string;
     providerOptions?: import("@ai-sdk/provider-utils").ProviderOptions;

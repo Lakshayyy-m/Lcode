@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import z from "zod";
+import type { Sandbox } from "../../sanbox.js";
 
 const grepSchema = z.object({
   pattern: z
@@ -20,17 +21,16 @@ const grepSchema = z.object({
 
 const workingDir = resolve(process.argv[1] || process.cwd());
 
-export default function createGrepTool() {
+export default function createGrepTool(sandbox: Sandbox) {
   return tool({
-    execute: ({ pattern, path, glob }) => {
-      console.log("Using Grep Tool------------------")
+    execute: async ({ pattern, path, glob }) => {
+      console.log("Using Grep Tool------------------");
       const pointOfInterest = resolve(workingDir, path || ".");
       const escapedPattern = pattern.replace(/'/g, `'\\''`);
       const escapedGlob = (glob || "*").replace(/'/g, `'\\''`);
       const cmd = `grep -rn --exclude-dir=node_modules --exclude-dir=.git --include='${escapedGlob}' -E '${escapedPattern}' '${pointOfInterest}' 2>/dev/null`;
-
       try {
-        const stdout = execSync(cmd, { encoding: "utf-8", timeout: 10_000 });
+        const { stdout } = await sandbox.exec(cmd);
         const lines = stdout.trim().split(`\n`).filter(Boolean);
 
         const MAX_MATCHES = 50;

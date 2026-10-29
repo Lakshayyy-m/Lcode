@@ -9,15 +9,17 @@ import localOps from "./lib/LocalOpsBackend.js";
 import { buildSystemPrompt, type PromptContext } from "./system.js";
 import { join, resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
+import { createLocalSandbox } from "./sanbox-local.js";
 
 process.loadEnvFile();
-const cwd = resolve(process.argv[1] || process.cwd());
-
+const cwd = resolve(process.cwd());
+const sandbox = createLocalSandbox(cwd);
+console.error(`Sanbox: ${sandbox.type}`);
 const MODEL = xai("grok-4.3");
 const TOOLS = {
-  read: createReadTool(),
-  grep: createGrepTool(),
-  bash: createBashTool(localOps, createApproval({ mode: "interactive" })),
+  read: createReadTool(sandbox),
+  grep: createGrepTool(sandbox),
+  bash: createBashTool(sandbox, createApproval({ mode: "interactive" })),
 };
 
 const agentsPath = join(cwd, "AGENTS.md");
