@@ -11,6 +11,7 @@ import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { createLocalSandbox } from "./sanbox-local.js";
 import { createJustBashSandbox } from "./sandbox-just-bash.js";
 import type { SandboxLifecycle } from "./sanbox.js";
+import { addCacheControl } from "./cache.js";
 
 process.loadEnvFile();
 const cwd = resolve(process.cwd());
@@ -64,16 +65,18 @@ export const agent = new ToolLoopAgent({
   stopWhen: stepCountIs(50),
   onStepEnd: ({ usage, stepNumber }) => {
     console.error(
-      `Step ${stepNumber}: ${usage.inputTokens} input, ${usage.outputTokens} output.`,
+      `Step ${stepNumber}: ${usage.inputTokens} input, ${usage.outputTokens} output, ${usage.inputTokenDetails.cacheReadTokens ?? 0} cached`,
     );
     // appendTokenUsage(stepNumber, usage.inputTokens, usage.outputTokens);
   },
   prepareStep: ({ messages }) => {
     return {
-      messages: pruneMessages({
-        messages,
-        toolCalls: "before-last-3-messages",
-      }),
+      messages: addCacheControl(
+        pruneMessages({
+          messages,
+          toolCalls: "before-last-3-messages",
+        }),
+      ),
     };
   },
 });
