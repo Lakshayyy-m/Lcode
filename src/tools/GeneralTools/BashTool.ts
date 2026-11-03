@@ -29,8 +29,18 @@ export default function createBashTool(
       }
       console.log("Command executed: ", command);
 
-      const { stdout } = await sandbox.exec(command);
-      return stdout || "(no output)";
+      const result = await sandbox.exec(command);
+
+      const MAX_BASH_CHARS = 5000;
+
+      const stdout = result.stdout || "(no output)";
+      const cappedStdout =
+        stdout.length > MAX_BASH_CHARS
+          ? stdout.slice(-MAX_BASH_CHARS) +
+            `\n... (truncated,. showing last ${MAX_BASH_CHARS} chars)`
+          : stdout;
+
+      return cappedStdout;
     },
     description: `
     Execute a shell command in the working directory.
