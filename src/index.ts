@@ -1,4 +1,4 @@
-import { stepCountIs, ToolLoopAgent } from "ai";
+import { pruneMessages, stepCountIs, ToolLoopAgent } from "ai";
 import { xai } from "@ai-sdk/xai";
 import createReadTool from "./tools/FileSystemTools/ReadFileTool.js";
 import createGrepTool from "./tools/FileSystemTools/GrepFileTool.js";
@@ -7,7 +7,7 @@ import createBashTool, {
 } from "./tools/GeneralTools/BashTool.js";
 import { buildSystemPrompt, type PromptContext } from "./system.js";
 import { join, resolve } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { createLocalSandbox } from "./sanbox-local.js";
 import { createJustBashSandbox } from "./sandbox-just-bash.js";
 import type { SandboxLifecycle } from "./sanbox.js";
@@ -36,6 +36,22 @@ const projectContext = existsSync(agentsPath)
   ? readFileSync(agentsPath, "utf-8")
   : undefined;
 
+const tokenLogPath = join(cwd, "token-usage.csv");
+
+function appendTokenUsage(
+  stepNumber: number,
+  inputTokens: number | undefined,
+  outputTokens: number | undefined,
+) {
+  if (!existsSync(tokenLogPath)) {
+    appendFileSync(tokenLogPath, "step,inputTokens,outputTokens\n");
+  }
+  appendFileSync(
+    tokenLogPath,
+    `${stepNumber},${inputTokens ?? ""},${outputTokens ?? ""}\n`,
+  );
+}
+
 export const agent = new ToolLoopAgent({
   model: MODEL,
   tools: TOOLS,
@@ -46,6 +62,20 @@ export const agent = new ToolLoopAgent({
     projectContext,
   }),
   stopWhen: stepCountIs(50),
+  onStepEnd: ({ usage, stepNumber }) => {
+    console.error(
+      `Step ${stepNumber}: ${usage.inputTokens} input, ${usage.outputTokens} output.`,
+    );
+    // appendTokenUsage(stepNumber, usage.inputTokens, usage.outputTokens);
+  },
+  prepareStep: ({ messages }) => {
+    return {
+      messages: pruneMessages({
+        messages,
+        toolCalls: "before-last-3-messages",
+      }),
+    };
+  },
 });
 
 const prompt = process.argv.slice(2).join(" ") || "Hello.";
@@ -56,7 +86,7 @@ try {
   console.log(text + "\n");
   console.log(steps.length, "steps executed");
 } finally {
-  console.log("Closing harness")
-  await lifecycle.beforeStop?.(sandbox)
-  await sandbox.stop()
+  console.log("Closing harness");
+  await lifecycle.beforeStop?.(sandbox);
+  await sandbox.stop();
 }
