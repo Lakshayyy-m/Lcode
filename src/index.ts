@@ -12,6 +12,7 @@ import { createLocalSandbox } from "./sanbox-local.js";
 import { createJustBashSandbox } from "./sandbox-just-bash.js";
 import type { SandboxLifecycle } from "./sanbox.js";
 import { addCacheControl } from "./cache.js";
+import createTaskTool from "./tools/SubagentTools/TaskTool.js";
 
 process.loadEnvFile();
 const cwd = resolve(process.cwd());
@@ -21,15 +22,21 @@ const sandbox =
     ? await createJustBashSandbox(cwd)
     : createLocalSandbox(cwd);
 
+console.log("CWD:", sandbox.workingDirectory);
 let lifecycle: SandboxLifecycle = {};
 await lifecycle.afterStart?.(sandbox);
 
 console.error(`Sanbox: ${sandbox.type}`);
-const MODEL = xai("grok-4.3");
+const MODEL = xai("grok-4.7");
 const TOOLS = {
   read: createReadTool(sandbox),
   grep: createGrepTool(sandbox),
   bash: createBashTool(sandbox, createApproval({ mode: "interactive" })),
+};
+
+const toolsWithTask = {
+  ...TOOLS,
+  task: createTaskTool(sandbox, { read: TOOLS.read, grep: TOOLS.grep }),
 };
 
 const agentsPath = join(cwd, "AGENTS.md");
@@ -55,7 +62,7 @@ function appendTokenUsage(
 
 export const agent = new ToolLoopAgent({
   model: MODEL,
-  tools: TOOLS,
+  tools: toolsWithTask,
   instructions: buildSystemPrompt({
     workingDirectory: cwd,
     sandboxType: "local",

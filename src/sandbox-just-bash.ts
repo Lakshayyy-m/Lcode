@@ -18,6 +18,10 @@ export async function createJustBashSandbox(dir: string): Promise<Sandbox> {
     async exec(command) {
       const cmd = await jb.runCommand(command, { cwd: MOUNT });
       const finished = await cmd.wait();
+      // console.error(`
+      //   Just-Bash Command executed -> ${command} \nagainst ${MOUNT}\n
+      //   Just-Bash Command output -> ${await cmd.output()}
+      //   `);
       return {
         stdout: await cmd.output(),
         exitCode: finished.exitCode,

@@ -25,7 +25,7 @@ export default function createGrepTool(sandbox: Sandbox) {
   return tool({
     execute: async ({ pattern, path, glob }) => {
       console.log("Using Grep Tool------------------");
-      const pointOfInterest = resolve(workingDir, path || ".");
+      const pointOfInterest = resolve(sandbox.workingDirectory);
       const escapedPattern = pattern.replace(/'/g, `'\\''`);
       const escapedGlob = (glob || "*").replace(/'/g, `'\\''`);
       const cmd = `grep -rn --exclude-dir=node_modules --exclude-dir=.git --include='${escapedGlob}' -E '${escapedPattern}' '${pointOfInterest}' 2>/dev/null`;

@@ -16,8 +16,8 @@ export default function createReadTool(sandbox: Sandbox) {
   return tool({
     execute: async ({ path: filePath, offset, limit }) => {
       console.log("Using Read Tool--------------------------");
-      const abs = resolve(workingDir, filePath);
-      const content = await sandbox.readFile(abs);
+      const abs = resolve(sandbox.workingDirectory, filePath);
+      const content = await sandbox.readFile(filePath);
       let lines = content.split("\n");
 
       if (offset) lines = lines.splice(offset - 1);
