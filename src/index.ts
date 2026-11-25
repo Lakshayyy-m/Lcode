@@ -8,7 +8,7 @@ import createBashTool, {
 import { buildSystemPrompt, type PromptContext } from "./system.js";
 import { join, resolve } from "node:path";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
-import { createLocalSandbox } from "./sanbox-local.js";
+import { createLocalSandbox } from "./sandbox-local.js";
 import { createJustBashSandbox } from "./sandbox-just-bash.js";
 import type { SandboxLifecycle } from "./sanbox.js";
 import { addCacheControl } from "./cache.js";
