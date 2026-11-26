@@ -15,7 +15,7 @@ const readToolSchema = z.object({
 export default function createReadTool(sandbox: Sandbox) {
   return tool({
     execute: async ({ path: filePath, offset, limit }) => {
-      console.log("Using Read Tool--------------------------");
+      // console.log("Using Read Tool--------------------------");
       const abs = resolve(sandbox.workingDirectory, filePath);
       const content = await sandbox.readFile(filePath);
       let lines = content.split("\n");

@@ -24,7 +24,7 @@ const workingDir = resolve(process.argv[1] || process.cwd());
 export default function createGrepTool(sandbox: Sandbox) {
   return tool({
     execute: async ({ pattern, path, glob }) => {
-      console.log("Using Grep Tool------------------");
+      // console.log("Using Grep Tool------------------");
       const pointOfInterest = resolve(sandbox.workingDirectory);
       const escapedPattern = pattern.replace(/'/g, `'\\''`);
       const escapedGlob = (glob || "*").replace(/'/g, `'\\''`);
